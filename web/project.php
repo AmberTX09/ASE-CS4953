@@ -4,13 +4,15 @@ if (!securePage($_SERVER['PHP_SELF'])){die();}
 
 require_once("models/header.php");
 //require_once("start_sprint.php");
-
 $isAdmin = $loggedInUser->checkPermission(array(2));
-
 $connection = mysqli_connect("devdb.fulgentcorp.com","2013teamb","29G8l!06J82ofpPw","2013teamb");
+
+/*------------------------------Project Implementation-----------------------------*/
+
+//retrieves the project name from the URL.
 $token = $_GET['project'];
 
-//get the Project
+//get the Project and various information about it.
 $project = mysqli_query($connection, "SELECT * FROM "."Project WHERE ProjectName = '$token'");
 $projectInfo = mysqli_fetch_array($project);
 
@@ -19,7 +21,7 @@ $ProjectName = $projectInfo['ProjectName'];
 $DateCreated = $projectInfo['DateCreated'];
 $DateCompleted = $projectInfo['DateCompleted'];
 $Creator = $projectInfo['Creator'];
-
+$CurrentSprint = $projectInfo['CurrentSprint'];
 
 //if form is posted
 if(!isset($_POST['submit']))
@@ -105,7 +107,7 @@ if(!isset($_POST['submit']))
 	}
 	
 	
-	//delete teammember
+	//delete team member
 	if(!empty($_POST['deleteMember'])){
 	
 		foreach($_POST['deleteMember'] as $memberToDelete){
@@ -173,9 +175,10 @@ if($userRole == NULL && !$isAdmin){
 	header("Location: account.php"); die();
 }
 
-//----------Sprint Implementation
+/*-----------------------------Sprint Implementation------------------------------*/
 
-//Get the Current Sprint:
+/*
+// get current sprint
 $sprintNumQry = NULL;
 $sprintNumQry = mysqli_query($connection, "SELECT SprintNum FROM "."Sprint WHERE ProjectID = '$ProjectID' ORDER BY SprintNum ASC ");
 if($sprintNumQry != NULL){
@@ -184,8 +187,9 @@ if($sprintNumQry != NULL){
 		$currentSprint = $sprintNumber['SprintNum'];
 	}
 }
-//echo "$currentSprint";
+*/
 
+/*
 //get status of Current Sprint:
 $sprintStatus = NULL;
 if($sprintNumQry != NULL){
@@ -197,16 +201,14 @@ if($sprintNumQry != NULL){
 	$temp = mysqli_fetch_array($sprint);
 	$sprintStatus = $temp['SprintStatus'];
 }
+*/
 
 /*if (!empty($_POST['FinishForm'])){
 echo "<h1> test </h1>";
-
-
-
 }*/
 
 
-//Left Nav bar
+/*-----------------------------Left Nav bar-----------------------------*/
 echo "
 <body>
 <div id='wrapper'>
@@ -215,7 +217,7 @@ echo "
 <div id='left-nav'>";
 include("left-nav.php");
 
-//Main Content
+/*-----------------------------Main Content-----------------------------*/
 echo "
 </div>
 <div id='main'>";
@@ -230,96 +232,173 @@ echo"
 	<input type='text' name='projectName' form = 'update' value='".$ProjectName."'/>
 	</p>
 	<p>";
-	 //Shows the Start button if a sprint has not been started yet.
-	 if($sprintNumQry != NULL){ 
-		if ($sprintStatus == 0){
+	 /*Shows the Start button if the first Sprint has not been started yet. 
+	   All sprints following will start automatically.*/ 
+	 if($CurrentSprint == NULL || $CurrentSprint == 0){ //Only time Current Sprint will be NULL is at very beginning.
+		//if ($sprintStatus == 0){
 			//session_start();
 			
-			//Creates the Drop down form for the User to Select Day, Month, and Year of Sprint
-			echo"
-			Start Sprint:<br>
-			Estimated Completion date:<br>
-			<FORM method='post'  action = 'start_sprint.php' id = 'Start' name='myForm'>
-			 Year:
-			<select id='myYear' name='Year'>
-				<option value='2013'>2013</option>
-				<option value='2014'>2014</option>
-			</select></br>
-			Month:
-			<select id='myMonth' name='Month'>
-				 <option value ='1'>01-Jan</option>
-				 <option value ='2'>02-Feb</option>  
-				 <option value ='3'>03-Mar</option>
-				 <option value ='4'>04-Apr</option>
-				 <option value ='5'>05-May</option>
-				 <option value ='6'>06-Jun</option>
-				 <option value ='7'>07-July</option>  
-				 <option value ='8'>08-Aug</option>
-				 <option value ='9'>09-Sept</option>
-				 <option value ='10'>10-Oct</option>
-				 <option value ='11'>11-Nov</option>
-				 <option value ='12'>12-Dec</option>  
-			</select>
-			Day:
-			<select id='myDay' name='Day'>
-			  <option>01</option>
-			  <option>02</option>  
-			  <option>03</option>
-			  <option>04</option>
-			  <option>05</option>
-			  <option>06</option>
-			  <option>7</option>  
-			  <option>8</option>
-			  <option>9</option>
-			  <option>10</option>
-			  <option>11</option>
-			  <option>12</option>
-			  <option>13</option>
-			  <option>14</option>
-			  <option>15</option>
-			  <option>16</option>
-			  <option>17</option>
-			  <option>18</option>
-			  <option>19</option>
-			  <option>20</option> 
-			  <option>21</option>
-			  <option>22</option>
-			  <option>23</option>
-			  <option>24</option>
-			  <option>25</option>
-			  <option>26</option>
-			  <option>27</option>
-			  <option>28</option>
-			  <option>29</option> 
-			  <option>30</option> 
-			  <option>31</option> 
-			</select>
-			<p><input type = 'submit' value ='Start Sprint'  name= 'Start_Sprint' class = 'submit'/></p></br>
-			<form/>";  
-				/*$_SESSION['Start_Sprint'] = $ProjectName;
-				$_SESSION['myDay'] = $_POST['myDay'];
-				$_SESSION['myMonth'] = $_POST['myMonth'];
-				$_SESSION['myYear'] = $_POST['myYear'];*/
-				
-				//echo $_POST['month'];
+		//Creates the Drop down form for the User to Select Day, Month, and Year of Sprint
+		echo"
+		<h3>Start Sprint</h3><br>
+		Estimated Completion date:<br>
+		";//<FORM method='post'  action = 'StartSprint.php' id = 'Start' name='SprintForm'>
+		echo"
+		<FORM method = 'post' action = ".$_SERVER['PHP_SELF']." id = 'Start' name = 'SprintForm'>
+		Year:
+		<select id='myYear' name='Year'>
+			<option value='2013'>2013</option>
+			<option value='2014'>2014</option>
+		</select></br>
+		Month:
+		<select id='myMonth' name='Month'>
+			 <option value ='1'>01-Jan</option>
+			 <option value ='2'>02-Feb</option>  
+			 <option value ='3'>03-Mar</option>
+			 <option value ='4'>04-Apr</option>
+			 <option value ='5'>05-May</option>
+			 <option value ='6'>06-Jun</option>
+			 <option value ='7'>07-July</option>  
+			 <option value ='8'>08-Aug</option>
+			 <option value ='9'>09-Sept</option>
+			 <option value ='10'>10-Oct</option>
+			 <option value ='11'>11-Nov</option>
+			 <option value ='12'>12-Dec</option>  
+		</select></br>
+		Day:
+		<select id='myDay' name='Day'>
+		  <option>01</option>
+		  <option>02</option>  
+		  <option>03</option>
+		  <option>04</option>
+		  <option>05</option>
+		  <option>06</option>
+		  <option>7</option>  
+		  <option>8</option>
+		  <option>9</option>
+		  <option>10</option>
+		  <option>11</option>
+		  <option>12</option>
+		  <option>13</option>
+		  <option>14</option>
+		  <option>15</option>
+		  <option>16</option>
+		  <option>17</option>
+		  <option>18</option>
+		  <option>19</option>
+		  <option>20</option> 
+		  <option>21</option>
+		  <option>22</option>
+		  <option>23</option>
+		  <option>24</option>
+		  <option>25</option>
+		  <option>26</option>
+		  <option>27</option>
+		  <option>28</option>
+		  <option>29</option> 
+		  <option>30</option> 
+		  <option>31</option> 
+		</select>
+		";//<input type = 'hidden' name = 'ProjectID' id='ProjectID' value = '".$ProjectID."'/>
+		echo"
+		<p><input type = 'submit' value ='Start Sprint'  name= 'StartSprint'/></p></br>
+		<form/>";  
+		
+		//Does Queries the specified information to the database
+		if(isset($_POST['Day'])){
+			$Day = $_POST['Day'];
+			$Month = $_POST['Month'];
+			$Year = $_POST['Year'];
+			//$ProjectID = $_POST['ProjectID'];
+			$EstCompDate = $Year."-".$Month."-".$Day;
 			
-		}else{
-			//If a Sprint is currently in progress, option to Finish the Sprint
-			//<input type = 'submit' form = 'FinishForm' value = 'Finish Sprint' name = 'FinishSprint'><br>
-			echo"
-				<input type = 'hidden' name = 'SprintFinish' id = 'SprintFinish' value = '0'/>
-				<form method='post'  action ='finish_sprint.php' name='FinishForm' >
-				<input type = 'button' value = 'Finish Sprint' 
-				</form>
-				
-			";
+			//SprintStatus=1 started, SprintStatus= 0 finished
+			//This insert will always be sprint 1.
+			$SprintQry="INSERT INTO "."Sprint(ProjectID,SprintNum,EstCompDate,SprintStatus)
+						VALUES('$ProjectID','1','$EstCompDate','1')";
+			
+			if (!mysqli_query($connection,$SprintQry)){
+				die('Error: ' . mysqli_error($connection));
+			}
+			
+			//Change Current Sprint in project to 1.
+			$ProjectQry = "UPDATE "."Project 
+						   SET CurrentSprint = '1'
+						   WHERE ProjectID = '$ProjectID'";
+			
+			if (!mysqli_query($connection,$ProjectQry)){
+				die('Error: ' . mysqli_error($connection));
+			}
 		}
-	}else{ 
+			
+	}else{
+		//If a Sprint is currently in progress,it will display the option to Finish the Sprint
+		//<input type = 'submit' form = 'FinishForm' value = 'Finish Sprint' name = 'FinishSprint'><br>
+		echo"
+			<h3>Currently on Sprint ".$CurrentSprint."</h3><br>
+		";
+			
+			/*<input type = 'hidden' name = 'SprintFinish' id = 'SprintFinish' value = '0'/>
+			<form method='post'  action ='finish_sprint.php' name='FinishForm'>
+			<input type = 'button' value = 'Finish Sprint'/><br> 
+			</form>*/
+			
+		echo"
+			<FORM method = 'post' action = ".$_SERVER['PHP_SELF']." id = 'Finish' name = 'SprintForm'>
+			<input type = 'hidden' name = 'SprintFinish' id = 'SprintFinish' value = 'FinishTrue'/>
+			<p><input type = 'submit' value ='Finish Sprint'  name= 'FinishSprint'/></p></br>
+			<form/>
+		";
+		
+		//If the user clicks the "Finish Sprint" button, the following will execute.
+		if(isset($_POST['SprintFinish'])){
+		
+			//First, the Current Sprint status will be updated to 0, and the finish time will be recorded. 
+			//$timezone = date_default_timezone_get();
+			//date_default_timezone_set($timezone);
+			//$FinishDate = date('yyyy-mm-dd hh:ii:ss', time());
+			$FinishSprintQry = "UPDATE "."Sprint
+							    SET SprintStatus = '0', FinishTime = CURDATE()
+							    WHERE ProjectID = '$ProjectID' 
+							    AND SprintNum = '$CurrentSprint'";
+			
+			if (!mysqli_query($connection,$FinishSprintQry)){
+				die('Error: ' . mysqli_error($connection));
+			}
+			
+			//Second, New Sprint will be created and started.
+			$CurrentSprint = $CurrentSprint+1;
+			//need to change way of choosing date, and remove hard coded EstCompDate
+			//looking into function "strtotime" 
+			//example as follows: $newDate = strtotime($date.' + 31 days');
+			//Instead of having drop down menu for an exact date, we could do a sprint interval
+			//example: 1 week, 2 weeks, 3 weeks, all the way up to x amount of months.
+			//this way, we can just add the number of days to current date using the strtotime function.
+			$NewSprintQry = "INSERT INTO "."Sprint(ProjectID,SprintNum,EstCompDate,SprintStatus)
+						VALUES('$ProjectID','$CurrentSprint','2014-01-01','1')";
+						
+			if (!mysqli_query($connection,$NewSprintQry)){
+				die('Error: ' . mysqli_error($connection));
+			}
+			
+			//Finally, update the Project table with the current Sprint number.
+			$UpdateProjectQry = "UPDATE "."Project 
+						   SET CurrentSprint = '$CurrentSprint'
+						   WHERE ProjectID = '$ProjectID'";
+			
+			if (!mysqli_query($connection,$UpdateProjectQry)){
+				die('Error: ' . mysqli_error($connection));
+			}
+		
+		}
+	}
+	/*}else{ 
 		//show start sprint
 		echo"fill in later";
-	}
+	}*/
 	
 echo"
+	<br><br>
 	<a href='create_item.php?create_item=".$ProjectName."'>Create Item</a><br />
 	<a href='view_item.php?view_item=".$ProjectName."'>View Item List</a>
 	<br>
@@ -555,7 +634,4 @@ echo"
 </div>
 </body>
 </html>";
-
-
-
 ?>

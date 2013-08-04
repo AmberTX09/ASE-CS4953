@@ -575,6 +575,7 @@ echo"
 		</div>
 		<input type=\"submit\" name = \"Submit_Report\" value=\"Submit\">
 	</p>
+	<p> <a href='test_item.php?test_item=".$ProjectName."'>test item</a><br> </p>
     ";
 echo"
 </td>

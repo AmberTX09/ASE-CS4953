@@ -1,8 +1,9 @@
-<?php
+<? php
 require "rf/razorflow.php";
 
 
 $dataSource = new MySQLDataSource('2013teamb', '2013teamb', '29G8l!06J82ofpPw', 'devdb.fulgentcorp.com');
+
 $dataSource->setSQLSource('Item');
 
 // Create a chart to show aggregated sales by genre

@@ -104,7 +104,7 @@ if(!isset($_POST['submit']))
 	}
 	
 	//update item container
-a	if(!empty($_POST['container'])){
+	if(!empty($_POST['container'])){
 		$newContainer = $_POST['container'];
 		mysqli_query($connection, "UPDATE "."Item 
 									SET ContainerID = '$newContainer '

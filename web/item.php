@@ -37,11 +37,13 @@ $Priority = $itemInfo['Priority'];
 $Description = $itemInfo['Description'];
 $ContainerID = $itemInfo['ContainerID'];
 $ProjectID = $itemInfo['ProjectID'];
+$Sprint = $itemInfo['Sprint'];
 
-//get the Project Name
+//get the Project Name and Current Sprint
 	$project = mysqli_query($connection, "SELECT * FROM "."Project WHERE ProjectID = '$ProjectID '");
 	$projectInfo = mysqli_fetch_array($project);
 	$ProjectName = $projectInfo['ProjectName'];
+    $ProjectCurrSprint = $projectInfo['CurrentSprint'];
 
 
 //if form is posted
@@ -105,10 +107,17 @@ if(!isset($_POST['submit']))
 	
 	//update item container
 	if(!empty($_POST['container'])){
-		$newContainer = $_POST['container'];
-		mysqli_query($connection, "UPDATE "."Item 
-									SET ContainerID = '$newContainer '
+        $newContainer = $_POST['container'];
+		if($Sprint != NULL){
+            mysqli_query($connection, "UPDATE "."Item 
+									SET ContainerID = '$newContainer ', Sprint = 'NULL'
 									WHERE "."Item.ItemID = $ItemID");
+        }
+        else{
+            mysqli_query($connection, "UPDATE "."Item 
+									SET ContainerID = '$newContainer ', Sprint = $ProjectCurrSprint
+									WHERE "."Item.ItemID = $ItemID");
+        }
 	}
 	
 	//update priority
@@ -135,17 +144,18 @@ if(!isset($_POST['submit']))
 									WHERE "."Item.ItemID = $ItemID");
 	}
 
-
-	if($_POST['submit'] == "Claim Task"){
-		//$claim = $_POST['submit'];
-		mysqli_query($connection, "UPDATE "."Task
+    if(!empty($_POST['submit'])){
+        if($_POST['submit'] == "Claim Task"){
+            //$claim = $_POST['submit'];
+            mysqli_query($connection, "UPDATE "."Task
 									SET CurrentUser = '$loggedInUser->user_id'
 									WHERE "."Task.ItemID = $ItemID");
-	}elseif($_POST['submit'] == "Unclaim Task"){
-		mysqli_query($connection, "UPDATE "."Task
+        }elseif($_POST['submit'] == "Unclaim Task"){
+            mysqli_query($connection, "UPDATE "."Task
 									SET CurrentUser = '$claim '
 									WHERE "."Task.ItemID = $ItemID");
-	}
+        }
+    }
 	
 
 /*		
@@ -470,7 +480,7 @@ echo"
 				<p>".$row['Description']."</p>
 			";
 			//task status 0 is
-			if($row[CurrentUser] == NULL || "")
+			if($row['CurrentUser'] == NULL || "")
 				echo"<p><input type='submit' value='Claim Task' form = 'task' class='submit'/></p>";
 			elseif($loggeInUser->user_id == $row[CurrentUser])
 				echo"<p><input type='submit' value='Unclaim Task' form = 'task' class='submit'/></p>

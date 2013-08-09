@@ -38,12 +38,10 @@ $Description = $itemInfo['Description'];
 $ContainerID = $itemInfo['ContainerID'];
 $ProjectID = $itemInfo['ProjectID'];
 
-
-//get the Project Name and Project Current Sprint
+//get the Project Name
 	$project = mysqli_query($connection, "SELECT * FROM "."Project WHERE ProjectID = '$ProjectID '");
 	$projectInfo = mysqli_fetch_array($project);
 	$ProjectName = $projectInfo['ProjectName'];
-    $ProjectCurrSprint = $projectInfo['CurrentSprint'];
 
 
 //if form is posted
@@ -106,19 +104,11 @@ if(!isset($_POST['submit']))
 	}
 	
 	//update item container
-	if(!empty($_POST['container'])){
+a	if(!empty($_POST['container'])){
 		$newContainer = $_POST['container'];
-        if ($_POST['container'].value != 2){
-                     mysqli_query($connection, "UPDATE "."Item
-                                  SET ContainerID = '$newContainer '
-                                  WHERE "."Item.ItemID = $ItemID");
-        }
-        else{
-                    mysqli_query($connection, "UPDATE "."Item
-                                  SET ContainerID = '$newContainer '
-                                  AND Sprint = $ProjectCurrSprint;
-                                  WHERE "."Item.ItemID = $ItemID");
-        }
+		mysqli_query($connection, "UPDATE "."Item 
+									SET ContainerID = '$newContainer '
+									WHERE "."Item.ItemID = $ItemID");
 	}
 	
 	//update priority
